@@ -1,0 +1,77 @@
+[workspace]
+name = "testing_evk4_prophesee_sdk"
+version = "0.1.0"
+channels = ["conda-forge"]
+platforms = ["win-64"]
+
+[activation.env]
+PYTHONPATH = "C:\\Program Files\\Prophesee\\lib\\python3\\site-packages"
+PYTHONNOUSERSITE = "1"
+
+[tasks]
+start = "python main.py"
+
+# ====================
+# Conda dependencies
+# ====================
+[dependencies]
+ffmpeg = ">=8.0.1,<9"
+matplotlib = ">=3.10.8,<4"
+mlflow = ">=3.8.1,<4"
+numba = ">=0.58.1,<0.60"
+pycocotools = ">=2.0.11,<3"
+python = "3.12.*"
+seaborn = ">=0.13.2,<0.14"
+plotly = ">=6.5.2,<7"
+scipy = ">=1.17.0,<2"
+tqdm = ">=4.67.3,<5"
+nicegui = ">=3.7.1,<4"
+
+# ====================
+# PyPI configuration
+# ====================
+[pypi-options]
+extra-index-urls = ["https://download.pytorch.org/whl/cpu"]
+# For CUDA (instead of CPU):
+# extra-index-urls = ["https://download.pytorch.org/whl/cu128"]
+
+# ====================
+# PyPI dependencies
+# ====================
+[pypi-dependencies]
+# PyTorch ecosystem
+pytorch-lightning = "==2.6.0"
+torch = "==2.9.1"
+torchvision = "==0.24.1"
+
+# ONNX
+onnx = "==1.20.0"
+onnxruntime = "==1.23.2"
+
+# Scientific / ML
+h5py = "*"
+kornia = ">=0.8.2,<0.9"
+networkx = "<3"
+pandas = "*"
+scikit-image = "*"
+scipy = "*"
+tensorboard = "*"
+
+# Computer vision
+opencv-python = "==4.5.5.64"
+sk-video = "==1.1.10"
+
+# Utilities
+botocore = "*"
+command-runner = "*"
+fire = "==0.4.0"
+html5lib = "==1.1"
+importlib-metadata = "*"
+lockfile = "==0.12.2"
+msgpack = "==1.1.2"
+pexpect = "==4.9.0"
+profilehooks = "==1.12.0"
+pywebview = "*"
+pytest = "*"
+requests = "==2.32.5"
+tqdm = "*"
