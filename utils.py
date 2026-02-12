@@ -16,12 +16,12 @@ def raw_to_npz(file_path, overwrite=False):
     if not path.exists():
         raise FileNotFoundError(path)
     
-    if path.suffix.lower() != ".raw":
-        raise ValueError(f"Expected .raw file, got: {path.suffix}")
+    if path.suffix.lower() != '.raw':
+        raise ValueError(f'Expected .raw file, got: {path.suffix}')
 
-    npy_path = path.with_suffix(".npz")
+    npy_path = path.with_suffix('.npz')
     if npy_path.exists() and not overwrite:
-        warnings.warn(f"{npy_path} already exists, skipping (use overwrite=True to replace)")
+        warnings.warn(f'{npy_path} already exists, skipping (use overwrite=True to replace)')
         return
 
     camera = Camera.from_file(str(path))
@@ -29,7 +29,7 @@ def raw_to_npz(file_path, overwrite=False):
     width = slicer.camera().width()
     height = slicer.camera().height()
     chunks = []
-    for slice in tqdm(slicer, desc="Converting"):
+    for slice in tqdm(slicer, desc='Converting'):
         if slice.events.size > 0:
             chunks.append(slice.events.copy())
     all_events = np.concatenate(chunks)
@@ -68,13 +68,13 @@ def display_event_histogram(histogram):
     fig = go.Figure(go.Heatmap(z=histogram))
     fig.show()
 
-if __name__ == "__main__":
-    file_path = os.getenv("FILE_PATH")
+if __name__ == '__main__':
+    file_path = os.getenv('FILE_PATH')
     if not file_path:
-        raise ValueError("FILE_PATH environment variable not set")
+        raise ValueError('FILE_PATH environment variable not set')
     raw_to_npz(file_path)
 
-    npz_path = Path(file_path).with_suffix(".npz")
+    npz_path = Path(file_path).with_suffix('.npz')
     data = np.load(npz_path)
     events, width, height = data['events'], data['width'], data['height']
 

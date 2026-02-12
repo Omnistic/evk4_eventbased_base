@@ -23,6 +23,10 @@ def main_page():
             fig.update_layout(template='plotly_dark' if dark.value else 'plotly')
             histogram_plot.update()
 
+            fig = timetrace_plot.figure
+            fig.update_layout(template='plotly_dark' if dark.value else 'plotly')
+            timetrace_plot.update()
+
     def update_histogram():
         if current_data is None:
             return
@@ -45,15 +49,95 @@ def main_page():
             colorbar=dict(title='Count')
         ))
         fig.update_layout(
+            title='HISTOGRAM',
             xaxis_title='X Coordinate',
             yaxis_title='Y Coordinate',
             yaxis=dict(scaleanchor='x', scaleratio=1),
             margin=dict(l=50, r=50, t=50, b=50),
             template='plotly_dark' if dark.value else 'plotly',
+            dragmode='drawrect',
+            newshape=dict(line=dict(color='cyan', width=2), fillcolor='rgba(0,255,255,0.2)'),
+            modebar_add=['drawrect', 'eraseshape']
         )
         histogram_card.visible = True
         histogram_plot.figure = fig
         histogram_plot.update()
+
+    def on_shape_drawn(e):
+        if current_data is None or e.args is None:
+            return
+        
+        args = e.args
+
+        if 'shapes' not in args:
+            return
+        
+        shapes = args['shapes']
+        if not shapes or len(shapes) == 0:
+            return
+        
+        shape = shapes[-1]
+        
+        x_min = int(shape['x0'])
+        x_max = int(shape['x1'])
+        y_min = int(shape['y0'])
+        y_max = int(shape['y1'])
+
+        if x_min > x_max:
+            x_min, x_max = x_max, x_min
+        if y_min > y_max:
+            y_min, y_max = y_max, y_min
+
+        plot_timetrace(x_min, x_max, y_min, y_max)
+
+    def plot_timetrace(x_min, x_max, y_min, y_max):
+        events = current_data['events']
+        
+        polarity = polarity_select.value
+        if polarity == 'CD ON (polarity=1)':
+            events = events[events['p'] == 1]
+        elif polarity == 'CD OFF (polarity=0)':
+            events = events[events['p'] == 0]
+        
+        mask = (
+            (events['x'] >= x_min) & (events['x'] <= x_max) &
+            (events['y'] >= y_min) & (events['y'] <= y_max)
+        )
+        selected_events = events[mask]
+        
+        if len(selected_events) == 0:
+            ui.notify('No events in selection', type='warning')
+            return
+        
+        max_points = 10000
+        if len(selected_events) > max_points:
+            indices = np.random.choice(len(selected_events), max_points, replace=False)
+            indices.sort()
+            selected_events = selected_events[indices]
+            ui.notify(f'Downsampled to {max_points:,} points', type='info')
+        
+        times = selected_events['t'] / 1e6
+        polarities = selected_events['p']
+        colors = np.where(polarities == 1, '#E69F00', '#56B4E9')
+        
+        jitter = np.random.uniform(-0.5, 0.5, len(times))
+
+        fig = go.Figure()
+        fig.add_trace(go.Scattergl(
+            x=times, 
+            y=jitter,
+            mode='markers',
+            marker=dict(size=3, color=colors),
+        ))
+        fig.update_layout(
+            title='TIME TRACE',
+            xaxis_title='Time (s)',
+            yaxis=dict(visible=False, range=[-0.6, 0.6]),
+            template='plotly_dark' if dark.value else 'plotly',
+        )
+        timetrace_plot.visible = True
+        timetrace_plot.figure = fig
+        timetrace_plot.update()
 
     async def pick_file():
         result = await app.native.main_window.create_file_dialog(
@@ -154,17 +238,23 @@ def main_page():
         bias_table = ui.table(columns=[], rows=[], column_defaults={'align': 'center', 'headerClasses': 'uppercase text-primary'})
         bias_table.visible = False
     
-    with ui.card() as histogram_card:
-        with ui.row().classes('w-full justify-between items-center'):
-            ui.label('EVENT HISTOGRAM').classes('text-lg font-bold')
-            polarity_select = ui.select(
-                options=['BOTH', 'CD ON (polarity=1)', 'CD OFF (polarity=0)'],
-                value='BOTH',
-                label='MODE',
-                on_change=lambda: update_histogram()
-            ).classes('w-48')
-        histogram_plot = ui.plotly({})
-    histogram_card.visible = False
+    with ui.row():
+        with ui.card() as histogram_card:
+            with ui.row():
+                polarity_select = ui.select(
+                    options=['BOTH', 'CD ON (polarity=1)', 'CD OFF (polarity=0)'],
+                    value='BOTH',
+                    label='MODE',
+                    on_change=lambda: update_histogram()
+                ).classes('w-48')
+            with ui.row():
+                histogram_plot = ui.plotly({})
+                histogram_plot.on('plotly_relayout', on_shape_drawn)
+                timetrace_plot = ui.plotly({})
+                timetrace_plot.visible = False
+        histogram_card.visible = False
+
+    ui.separator().bind_visibility_from(histogram_card, 'visible')
 
 app.on_startup(lambda: app.native.main_window.maximize())
 ui.run(native=True)
