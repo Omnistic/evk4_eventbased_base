@@ -47,9 +47,15 @@ def raw_to_npz(file_path, overwrite=False):
 
     np.savez(npy_path, events=all_events, width=width, height=height, **biases)
 
-def compute_event_histogram(events, width, height):
+def compute_event_histogram(events, width, height, mode='all'):
     width = int(width)
     height = int(height)
+    
+    if mode == 'on':
+        events = events[events['p'] == 1]
+    elif mode == 'off':
+        events = events[events['p'] == 0]
+    
     histogram = np.zeros((height, width), dtype=np.uint32)
     coords, counts = np.unique(
         events['y'].astype(np.int64) * width + events['x'].astype(np.int64), 
