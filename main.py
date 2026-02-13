@@ -4,15 +4,28 @@ from utils import raw_to_npz, compute_event_histogram
 import asyncio
 import numpy as np
 import plotly.graph_objects as go
+import os
 from concurrent.futures import ThreadPoolExecutor
 
 executor = ThreadPoolExecutor(max_workers=1)
+
+POLARITY_OPTIONS = ['BOTH', 'CD ON (polarity=1)', 'CD OFF (polarity=0)']
+BIAS_NAMES = ['bias_diff', 'bias_diff_off', 'bias_diff_on', 'bias_fo', 'bias_hpf', 'bias_refr']
+MAX_TIMETRACE_POINTS = 50000
 
 @ui.page('/')
 def main_page():
     dark = ui.dark_mode(True)
     current_file = None
     current_data = None
+
+    def get_polarity_mode():
+        polarity = polarity_select.value
+        if polarity == 'CD ON (polarity=1)':
+            return 'on'
+        elif polarity == 'CD OFF (polarity=0)':
+            return 'off'
+        return 'all'
 
     def toggle_dark():
         dark.toggle()
@@ -34,14 +47,7 @@ def main_page():
         events = current_data['events']
         width, height = int(current_data['width']), int(current_data['height'])
         
-        polarity = polarity_select.value
-        if polarity == 'CD ON (polarity=1)':
-            mode = 'on'
-        elif polarity == 'CD OFF (polarity=0)':
-            mode = 'off'
-        else:
-            mode = 'all'
-        
+        mode = get_polarity_mode()
         histogram = compute_event_histogram(events, width, height, mode)
         fig = go.Figure(go.Heatmap(
             z=histogram, 
@@ -51,7 +57,7 @@ def main_page():
         fig.update_layout(
             xaxis_title='X Coordinate',
             yaxis_title='Y Coordinate',
-            yaxis=dict(scaleanchor='x', scaleratio=1),
+            yaxis=dict(scaleanchor='x', scaleratio=1, autorange='reversed'),
             margin=dict(l=50, r=50, t=50, b=50),
             template='plotly_dark' if dark.value else 'plotly',
             dragmode='drawrect',
@@ -63,7 +69,7 @@ def main_page():
         histogram_plot.update()
 
     def on_shape_drawn(e):
-        if current_data is None or e.args is None:
+        if e.args is None or current_data is None:
             return
         
         args = e.args
@@ -92,10 +98,10 @@ def main_page():
     def plot_timetrace(x_min, x_max, y_min, y_max):
         events = current_data['events']
         
-        polarity = polarity_select.value
-        if polarity == 'CD ON (polarity=1)':
+        mode = get_polarity_mode()
+        if mode == 'on':
             events = events[events['p'] == 1]
-        elif polarity == 'CD OFF (polarity=0)':
+        elif mode == 'off':
             events = events[events['p'] == 0]
         
         mask = (
@@ -108,12 +114,11 @@ def main_page():
             ui.notify('No events in selection', type='warning')
             return
         
-        max_points = 50000
-        if len(selected_events) > max_points:
-            indices = np.random.choice(len(selected_events), max_points, replace=False)
+        if len(selected_events) > MAX_TIMETRACE_POINTS:
+            indices = np.random.choice(len(selected_events), MAX_TIMETRACE_POINTS, replace=False)
             indices.sort()
             selected_events = selected_events[indices]
-            ui.notify(f'Downsampled to {max_points:,} points', type='info')
+            ui.notify(f'Downsampled to {MAX_TIMETRACE_POINTS:,} points', type='info')
         
         times = selected_events['t'] / 1e6
         duration = times.max() - times.min()
@@ -180,14 +185,20 @@ def main_page():
         file_label.text = f'Loaded: {current_file.name}'
         file_label.visible = True
         
-        current_data = np.load(current_file)
-        events = current_data['events']
-        width, height = int(current_data['width']), int(current_data['height'])
+        try:
+            current_data = np.load(current_file)
+            events = current_data['events']
+            width, height = int(current_data['width']), int(current_data['height'])
+        except Exception as e:
+            ui.notify(f'Failed to load file: {e}', type='negative')
+            file_label.visible = False
+            current_file = None
+            current_data = None
+            return
         
-        bias_names = ['bias_diff', 'bias_diff_off', 'bias_diff_on', 'bias_fo', 'bias_hpf', 'bias_refr']
         bias_columns = []
         bias_row = {}
-        for name in bias_names:
+        for name in BIAS_NAMES:
             if name in current_data:
                 bias_columns.append({'name': name, 'label': name, 'field': name})
                 bias_row[name] = int(current_data[name])
@@ -243,7 +254,7 @@ def main_page():
         with ui.card().classes('flex-grow p-0') as histogram_card:
             with ui.row().classes('w-full items-center'):
                 polarity_select = ui.select(
-                    options=['BOTH', 'CD ON (polarity=1)', 'CD OFF (polarity=0)'],
+                    options=POLARITY_OPTIONS,
                     value='BOTH',
                     label='MODE',
                     on_change=lambda: update_histogram()
@@ -263,5 +274,11 @@ def main_page():
 
     ui.separator().bind_visibility_from(histogram_card, 'visible')
 
+def shutdown():
+    print('Shutting down...')
+    executor.shutdown(wait=False)
+    os._exit(0)
+
 app.on_startup(lambda: app.native.main_window.maximize())
+app.on_shutdown(shutdown)
 ui.run(native=True)
