@@ -119,16 +119,33 @@ New to event cameras? Prophesee provides sample datasets to get you started:
 - Look for `.raw` files (native event camera format)
 - The dashboard will automatically convert `.raw` to `.npz` on first load
 
-**Recommended Datasets for Testing:**
-- **Simple scenes** - Start with stationary camera recordings
-- **Dynamic scenes** - Moving objects, camera motion
-- **High-speed events** - Fast motion, vibration
+**Recommended Dataset:**
+
+We recommend starting with **`monitoring_40_50hz`** - a great dataset for exploring the dashboard's capabilities:
+
+- **Description**: Object vibration at 40Hz and 50Hz frequencies
+- **Camera**: Gen3.0
+- **Duration**: 6 seconds
+- **Size**: RAW EVT2 (157 MB)
+- **Perfect for**: Viewing vibration frequencies in the power spectrum analysis
+
+This dataset showcases:
+- ✅ Clear temporal patterns in the time trace
+- ✅ Distinct frequency peaks (40Hz and 50Hz) in the power spectrum
+- ✅ Dynamic event activity for histogram visualization
+- ✅ Inter-event interval analysis
+
+> **⚠️ Important:** When analyzing frequencies, use **SIGNED (ON - OFF)** mode in the polarity selector! 
+> 
+> In BOTH mode, you might see peaks at **80Hz and 100Hz** (double the actual frequencies) because both ON and OFF events are triggered at each vibration cycle. SIGNED mode subtracts OFF from ON events, revealing the true **40Hz and 50Hz** frequencies.
 
 **Usage:**
-1. Download a `.raw` file from Prophesee datasets
+1. Download the `.raw` file from [Prophesee datasets](https://docs.prophesee.ai/stable/datasets.html#chapter-datasets)
 2. Click "Open File" in the dashboard
 3. Select the downloaded `.raw` file
 4. Dashboard automatically converts to `.npz` and loads the data
+5. **Set polarity mode to "SIGNED (ON - OFF)"**
+6. Check the **Power Spectrum** plot to see the true 40Hz and 50Hz peaks!
 
 > **Tip:** The first time you load a `.raw` file, conversion to `.npz` may take a moment. Subsequent loads of the same file will be much faster using the `.npz` version.
 
@@ -325,10 +342,6 @@ def test_file_loading():
 ## 🐛 Troubleshooting
 
 ### Common Issues
-
-**Polarity selector not updating plots**
-- Ensure you're using the latest version with `on_change` parameter in `ui.select()`
-- Try restarting the application
 
 **File conversion fails**
 - Check that Metavision SDK is properly installed
