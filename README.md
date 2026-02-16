@@ -131,8 +131,10 @@ This dataset showcases:
 
 ```
 evk4_dashboard/
+├── 📄 launch_dashboard.bat      # Windows one-click launcher
 ├── 📄 app.py                    # Application entry point
 ├── 🔧 utils.py                  # Event data processing utilities
+├── 📄 pixi.toml                # Dependency & environment configuration
 │
 ├── 📦 core/                     # Core application logic
 │   ├── __init__.py
