@@ -28,7 +28,7 @@ This project uses [Pixi](https://pixi.sh/) for dependency management, making ins
 
 #### Prerequisites
 
-Install Pixi if you haven't already:
+**1. Install Pixi** (if you haven't already):
 ```bash
 # macOS/Linux
 curl -fsSL https://pixi.sh/install.sh | bash
@@ -37,11 +37,20 @@ curl -fsSL https://pixi.sh/install.sh | bash
 iwr -useb https://pixi.sh/install.ps1 | iex
 ```
 
+**2. Install Prophesee Metavision SDK:**
+
+The Metavision SDK installation varies by platform. Follow the official instructions:
+
+- **Windows**: [Metavision SDK - Windows Installation](https://docs.prophesee.ai/stable/installation/windows.html)
+- **Linux**: [Metavision SDK - Linux Installation](https://docs.prophesee.ai/stable/installation/linux.html)
+
+> **Note:** After installing the SDK, make sure to install the Python bindings as described in the "Installing Python" section of the documentation.
+
 #### Setup
 
 ```bash
 # Clone the repository
-git clone <https://github.com/Omnistic/evk4_eventbased_base>
+git clone <your-repo-url>
 cd evk4_dashboard
 
 # Install dependencies and set up environment (that's it!)
@@ -54,7 +63,10 @@ If you prefer not to use Pixi:
 
 ```bash
 pip install nicegui numpy plotly imageio tqdm
-pip install metavision-sdk-stream  # Prophesee SDK
+
+# For Prophesee SDK, follow the platform-specific installation guide above
+# Then install Python bindings:
+# pip install metavision-sdk-core metavision-sdk-driver metavision-sdk-stream
 ```
 
 ### Running the Application
@@ -72,6 +84,30 @@ python app.py
 ```
 
 The dashboard will open in a native window, maximized and ready to use.
+
+---
+
+## 📦 Sample Datasets
+
+New to event cameras? Prophesee provides sample datasets to get you started:
+
+**Download Sample Data:**
+- [Prophesee Sample Datasets](https://docs.prophesee.ai/stable/datasets.html#chapter-datasets)
+- Look for `.raw` files (native event camera format)
+- The dashboard will automatically convert `.raw` to `.npz` on first load
+
+**Recommended Datasets for Testing:**
+- **Simple scenes** - Start with stationary camera recordings
+- **Dynamic scenes** - Moving objects, camera motion
+- **High-speed events** - Fast motion, vibration
+
+**Usage:**
+1. Download a `.raw` file from Prophesee datasets
+2. Click "Open File" in the dashboard
+3. Select the downloaded `.raw` file
+4. Dashboard automatically converts to `.npz` and loads the data
+
+> **Tip:** The first time you load a `.raw` file, conversion to `.npz` may take a moment. Subsequent loads of the same file will be much faster using the `.npz` version.
 
 ---
 
@@ -326,9 +362,13 @@ This project uses **Pixi** for reproducible dependency management. All dependenc
 - **Plotly** - Interactive plotting
 - **NumPy** - Numerical operations
 - **imageio** - Image/video I/O
+- **tqdm** - Progress bars
 
 ### Event Camera Specific
 - **Metavision SDK** - Prophesee event camera support
+  - Installation varies by platform
+  - See [Windows](https://docs.prophesee.ai/stable/installation/windows.html) or [Linux](https://docs.prophesee.ai/stable/installation/linux.html) installation guides
+  - Includes SDK driver and Python bindings
 
 See `pixi.toml` for the complete list of dependencies and their versions.
 
@@ -350,9 +390,9 @@ This project is licensed under the MIT License - see LICENSE file for details.
 
 ## 📞 Contact & Support
 
-- **Issues**: [GitHub Issues](https://github.com/Omnistic/evk4_eventbased_base/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/Omnistic/evk4_eventbased_base/discussions)
-- **Documentation**: [Wiki](https://github.com/Omnistic/evk4_eventbased_base/wiki)
+- **Issues**: [GitHub Issues](your-repo-url/issues)
+- **Discussions**: [GitHub Discussions](your-repo-url/discussions)
+- **Documentation**: [Wiki](your-repo-url/wiki)
 
 ---
 
@@ -360,6 +400,6 @@ This project is licensed under the MIT License - see LICENSE file for details.
 
 **Made with ❤️ for the event-based vision community**
 
-[⭐ Star this repo](https://github.com/Omnistic/evk4_eventbased_base) • [🐛 Report Bug](https://github.com/Omnistic/evk4_eventbased_base/issues) • [✨ Request Feature](https://github.com/Omnistic/evk4_eventbased_base/issues)
+[⭐ Star this repo](your-repo-url) • [🐛 Report Bug](your-repo-url/issues) • [✨ Request Feature](your-repo-url/issues)
 
 </div>
