@@ -4,6 +4,7 @@
 
 ![Python](https://img.shields.io/badge/python-3.8+-blue.svg)
 ![NiceGUI](https://img.shields.io/badge/NiceGUI-1.0+-green.svg)
+![Pixi](https://img.shields.io/badge/Pixi-managed-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 
 ---
@@ -23,12 +24,35 @@
 
 ### Installation
 
+This project uses [Pixi](https://pixi.sh/) for dependency management, making installation straightforward.
+
+#### Prerequisites
+
+Install Pixi if you haven't already:
+```bash
+# macOS/Linux
+curl -fsSL https://pixi.sh/install.sh | bash
+
+# Windows
+iwr -useb https://pixi.sh/install.ps1 | iex
+```
+
+#### Setup
+
 ```bash
 # Clone the repository
 git clone <https://github.com/Omnistic/evk4_eventbased_base>
 cd evk4_dashboard
 
-# Install dependencies
+# Install dependencies and set up environment (that's it!)
+pixi install
+```
+
+#### Alternative: Manual Installation (without Pixi)
+
+If you prefer not to use Pixi:
+
+```bash
 pip install nicegui numpy plotly imageio tqdm
 pip install metavision-sdk-stream  # Prophesee SDK
 ```
@@ -36,6 +60,14 @@ pip install metavision-sdk-stream  # Prophesee SDK
 ### Running the Application
 
 ```bash
+# With Pixi (recommended)
+pixi run python app.py
+
+# Or activate the environment first
+pixi shell
+python app.py
+
+# Without Pixi
 python app.py
 ```
 
@@ -287,6 +319,8 @@ We welcome contributions! Here's how:
 
 ## 📚 Dependencies
 
+This project uses **Pixi** for reproducible dependency management. All dependencies are automatically handled by Pixi.
+
 ### Core Libraries
 - **NiceGUI** - Web-based user interface
 - **Plotly** - Interactive plotting
@@ -295,6 +329,8 @@ We welcome contributions! Here's how:
 
 ### Event Camera Specific
 - **Metavision SDK** - Prophesee event camera support
+
+See `pixi.toml` for the complete list of dependencies and their versions.
 
 ---
 
