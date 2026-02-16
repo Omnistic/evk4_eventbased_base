@@ -31,10 +31,10 @@ This project uses [Pixi](https://pixi.sh/) for dependency management.
 **1. Install Pixi** (if you haven't already):
 ```powershell
 # Windows (PowerShell)
-iwr -useb [https://pixi.sh/install.ps1](https://pixi.sh/install.ps1) | iex
+iwr -useb https://pixi.sh/install.ps1 | iex
 
 # macOS/Linux
-curl -fsSL [https://pixi.sh/install.sh](https://pixi.sh/install.sh) | bash
+curl -fsSL https://pixi.sh/install.sh | bash
 ```
 
 **2. Install Prophesee Metavision SDK:**
@@ -48,7 +48,7 @@ The Metavision SDK must be installed system-wide before using this dashboard.
 
 1. **Clone the repository:**
    ```bash
-   git clone [https://github.com/Omnistic/evk4_dashboard.git](https://github.com/Omnistic/evk4_dashboard.git)
+   git clone https://github.com/Omnistic/evk4_dashboard.git
    cd evk4_dashboard
    ```
 2. **Configure Path:** Open `pixi.toml` and ensure the `PYTHONPATH` points to your Prophesee installation.
@@ -64,7 +64,7 @@ If you prefer the command line or are on Linux:
 
 ```bash
 # Clone the repository
-git clone [https://github.com/Omnistic/evk4_dashboard.git](https://github.com/Omnistic/evk4_dashboard.git)
+git clone https://github.com/Omnistic/evk4_dashboard.git
 cd evk4_dashboard
 
 # Install dependencies and set up environment
