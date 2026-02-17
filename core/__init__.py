@@ -5,6 +5,7 @@ Core application components including state management, constants, and validatio
 """
 
 from .state import AppState, PlotConfig, PLOT_CONFIG
+from .config import load_config, save_config
 from .constants import (
     POLARITY_OPTIONS,
     BIAS_NAMES,
@@ -33,6 +34,9 @@ __all__ = [
     'AppState',
     'PlotConfig',
     'PLOT_CONFIG',
+    # Config
+    'load_config',
+    'save_config',
     # Constants
     'POLARITY_OPTIONS',
     'BIAS_NAMES',

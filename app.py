@@ -14,8 +14,7 @@ from nicegui import ui, app
 import os
 import asyncio
 from contextlib import asynccontextmanager
-
-from core import AppState, RECONNECT_TIMEOUT
+from core import AppState, load_config, RECONNECT_TIMEOUT
 from ui import (
     build_main_layout,
     create_toggle_dark_callback,
@@ -82,7 +81,8 @@ def main_page() -> None:
     Constructs the complete dashboard interface and wires up all callbacks.
     """
     # Initialize state and UI mode
-    dark = ui.dark_mode(True)
+    config = load_config()
+    dark = ui.dark_mode(config["dark_mode"])
     state = AppState()
     
     # We need a mutable container to hold components reference

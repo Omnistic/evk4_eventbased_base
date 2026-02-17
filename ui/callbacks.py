@@ -17,6 +17,7 @@ import imageio
 
 from utils import generate_frames, get_polarity_mode_from_string
 from core import (
+    save_config,
     PLOT_CONFIG,
     MAX_DISPLAY_FRAMES,
     FRAME_PERCENTILE_ZMAX,
@@ -101,6 +102,7 @@ def create_toggle_dark_callback(state, dark, components):
         """Toggle between dark and light mode themes."""
         async with loading_overlay('Switching theme...'):
             dark.toggle()
+            save_config({"dark_mode": dark.value})
             components.icon.set_name('light_mode' if dark.value else 'dark_mode')
             
             # Small delay to show the spinner

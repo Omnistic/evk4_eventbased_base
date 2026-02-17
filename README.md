@@ -16,7 +16,7 @@
 - **Temporal Analysis** - Inter-event interval and power spectrum analysis
 - **Frame Generation** - Convert event streams to frame sequences with adjustable time windows
 - **Export Capabilities** - Save generated frames as multi-page TIFF files
-- **Dark/Light Themes** - Toggle between display modes for comfortable viewing
+- **Dark/Light Themes** - Toggle between display modes, with preference remembered across sessions
 
 ---
 
@@ -138,6 +138,7 @@ evk4_dashboard/
 │
 ├── 📦 core/                     # Core application logic
 │   ├── __init__.py
+│   ├── config.py                # User preference persistence
 │   ├── state.py                 # State management & configuration
 │   ├── constants.py             # Application constants
 │   └── validation.py            # Input validation functions
@@ -158,7 +159,7 @@ evk4_dashboard/
 | Module | Purpose | Lines |
 |--------|---------|-------|
 | **app.py** | Application entry point | 106 |
-| **core/** | State, constants, validation | 404 |
+| **core/** | State, config, constants, validation | 441 |
 | **services/** | File handling & data loading | 185 |
 | **ui/** | Layout, callbacks, plots | 1,217 |
 | **utils.py** | Event data utilities | 512 |
@@ -214,6 +215,13 @@ from core import AppState
 state = AppState()  # Centralized application state
 ```
 
+**User Preference Persistence**
+```python
+from core import load_config, save_config
+config = load_config()           # Reads ~/.evk4_dashboard_config.json
+save_config({"dark_mode": True}) # Writes preference to disk
+```
+
 **Component Communication**
 ```python
 # UI components returned as a NamedTuple
@@ -266,6 +274,18 @@ MY_NEW_PARAMETER: int = 42
 ```python
 from core import MY_NEW_PARAMETER
 ```
+
+### Adding a New User Preference
+
+**Add a default to** `core/config.py`:
+```python
+DEFAULT_CONFIG = {
+    "dark_mode": True,
+    "my_new_preference": "default_value",
+}
+```
+
+Then load and save it the same way as `dark_mode`.
 
 ### Adding Validation
 
@@ -332,6 +352,10 @@ def test_file_loading():
 **Frame export fails**
 - Verify write permissions for output directory
 - Check available disk space
+
+**Theme not remembered**
+- The preference is saved to `~/.evk4_dashboard_config.json`
+- If the file is corrupted or missing, the app defaults to dark mode on next launch
 
 ---
 
