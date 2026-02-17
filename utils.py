@@ -191,6 +191,34 @@ def filter_events_by_roi(
     )
     return events[mask]
 
+def filter_events_by_time_range(
+    events: npt.NDArray[np.void],
+    time_range: Optional[Tuple[float, float]]
+) -> npt.NDArray[np.void]:
+    """
+    Filter events to only those within a time range.
+
+    Args:
+        events: Event array with 't' timestamp field in microseconds
+        time_range: Time range as (t_min_s, t_max_s) in seconds, or None for no filtering.
+            Bounds are inclusive on both ends.
+
+    Returns:
+        Filtered event array. If time_range is None, returns input unchanged.
+
+    Example:
+        >>> events = load_events()
+        >>> time_range = (1.0, 3.5)  # Select events between 1s and 3.5s
+        >>> filtered = filter_events_by_time_range(events, time_range)
+    """
+    if time_range is None:
+        return events
+
+    t_min_us = int(time_range[0] * 1e6)
+    t_max_us = int(time_range[1] * 1e6)
+    mask = (events['t'] >= t_min_us) & (events['t'] <= t_max_us)
+    return events[mask]
+
 # ============================================================================
 # HISTOGRAM COMPUTATION
 # ============================================================================

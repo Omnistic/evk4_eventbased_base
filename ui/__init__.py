@@ -15,6 +15,10 @@ from .callbacks import (
     create_update_frame_display_callback,
     create_generate_frames_callback,
     create_export_frames_callback,
+    create_time_range_slider_callback,
+    create_time_range_input_callback,
+    create_time_range_apply_callback,
+    create_time_range_reset_callback,
 )
 from .plots import (
     update_histogram_plot,
@@ -37,6 +41,10 @@ __all__ = [
     'create_update_frame_display_callback',
     'create_generate_frames_callback',
     'create_export_frames_callback',
+    'create_time_range_slider_callback',
+    'create_time_range_input_callback',
+    'create_time_range_apply_callback',
+    'create_time_range_reset_callback',
     # Plots
     'update_histogram_plot',
     'update_iei_histogram',

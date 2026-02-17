@@ -26,6 +26,10 @@ from ui import (
     create_update_frame_display_callback,
     create_generate_frames_callback,
     create_export_frames_callback,
+    create_time_range_slider_callback,
+    create_time_range_input_callback,
+    create_time_range_apply_callback,
+    create_time_range_reset_callback,
     update_histogram_plot,
     update_iei_histogram,
     update_power_spectrum,
@@ -119,6 +123,10 @@ def main_page() -> None:
     update_frame_display = create_update_frame_display_callback(state, components)
     generate_frames = create_generate_frames_callback(state, dark, components)
     export_frames = create_export_frames_callback(state, components)
+    on_time_range_slider = create_time_range_slider_callback(state, components)
+    on_time_range_input = create_time_range_input_callback(state, components)
+    apply_time_range = create_time_range_apply_callback(state, dark, components)
+    reset_time_range = create_time_range_reset_callback(state, dark, components)
     
     # Wire up callbacks to UI components
     components.icon.on('click', toggle_dark)
@@ -127,11 +135,16 @@ def main_page() -> None:
     components.delta_t_input.on('update:model-value', on_delta_t_change)
     components.frames_input.on('update:model-value', on_frames_change)
     components.frame_slider.on('update:model-value', update_frame_display, throttle=0.1)
+    components.time_range_slider.on('update:model-value', on_time_range_slider, throttle=0.05)
+    components.time_range_from.on('update:model-value', on_time_range_input)
+    components.time_range_to.on('update:model-value', on_time_range_input)
     
     # Wire up button callbacks
     components.open_file_btn.on('click', handle_pick_file)
     components.generate_frames_btn.on('click', generate_frames)
     components.export_frames_btn.on('click', export_frames)
+    components.time_range_apply_btn.on('click', apply_time_range)
+    components.time_range_reset_btn.on('click', reset_time_range)
 
 
 def shutdown() -> None:

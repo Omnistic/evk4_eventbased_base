@@ -16,6 +16,7 @@ from utils import (
     compute_event_histogram,
     filter_events_by_polarity,
     filter_events_by_roi,
+    filter_events_by_time_range,
     create_signed_heatmap,
     create_regular_heatmap,
     get_polarity_mode_from_string,
@@ -130,7 +131,14 @@ def update_histogram_plot(state, dark_mode, polarity_mode, histogram_plot):
         
         if not validate_events_not_empty(events, 'plotting'):
             return
-        
+
+        # Apply time range filter only — ROI is drawn on the histogram
+        # and only affects the other plots, never the histogram itself
+        events = filter_events_by_time_range(events, state.current_time_range)
+
+        if not validate_events_not_empty(events, 'plotting'):
+            return
+
         histogram = compute_event_histogram(events, width, height, mode)
         
         # Create appropriate heatmap based on mode
@@ -182,6 +190,7 @@ def update_iei_histogram(state, dark_mode, polarity_mode, iei_plot):
 
         # Apply filters
         events = filter_events_by_roi(events, state.current_roi)
+        events = filter_events_by_time_range(events, state.current_time_range)
         events = filter_events_by_polarity(events, mode)
         
         if not validate_array_length(events, 2, 'events for IEI histogram'):
@@ -264,6 +273,7 @@ def update_power_spectrum(state, dark_mode, polarity_mode, spectrum_plot):
 
         # Apply ROI filter
         events = filter_events_by_roi(events, state.current_roi)
+        events = filter_events_by_time_range(events, state.current_time_range)
         
         if not validate_events_not_empty(events, 'power spectrum'):
             return
@@ -357,6 +367,7 @@ def update_timetrace(state, dark_mode, polarity_mode, timetrace_plot):
         
         # Apply filters
         events = filter_events_by_roi(events, state.current_roi)
+        events = filter_events_by_time_range(events, state.current_time_range)
         events = filter_events_by_polarity(events, mode)
         
         if not validate_events_not_empty(events, 'time trace'):

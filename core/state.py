@@ -25,6 +25,8 @@ class AppState:
         generated_timestamps: Timestamps corresponding to each generated frame
         updating: Flag to prevent recursive updates during UI changes
         current_roi: Current region of interest as (x_min, x_max, y_min, y_max)
+        current_time_range: Current time range filter as (t_min_s, t_max_s) in seconds,
+            or None to use the full recording duration
     """
     current_file: Optional[Path] = None
     current_data: Optional[Dict[str, Any]] = None
@@ -33,6 +35,7 @@ class AppState:
     generated_timestamps: Optional[npt.NDArray] = None
     updating: bool = False
     current_roi: Optional[Tuple[int, int, int, int]] = None
+    current_time_range: Optional[Tuple[float, float]] = None
 
 
 @dataclass

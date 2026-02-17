@@ -20,6 +20,10 @@ class UIComponents(NamedTuple):
     file_label: ui.label
     polarity_select: ui.select
     roi_label: ui.label
+    time_range_slider: ui.range
+    time_range_from: ui.number
+    time_range_to: ui.number
+    time_range_label: ui.label
     frame_polarity_select: ui.select
     delta_t_input: ui.number
     frames_input: ui.number
@@ -28,6 +32,8 @@ class UIComponents(NamedTuple):
     open_file_btn: ui.button
     generate_frames_btn: ui.button
     export_frames_btn: ui.button
+    time_range_apply_btn: ui.button
+    time_range_reset_btn: ui.button
     
     # Tables
     stats_table: ui.table
@@ -115,6 +121,19 @@ def build_main_layout(dark, on_polarity_change=None) -> UIComponents:
             ui.space()
             ui.badge('CD ON (polarity=1)').style(f'background-color: {PLOT_CONFIG.color_on} !important')
             ui.badge('CD OFF (polarity=0)').style(f'background-color: {PLOT_CONFIG.color_off} !important')
+
+        # Time range controls
+        with ui.row().classes('w-full items-center gap-4'):
+            ui.label('Time Range').classes('text-sm font-medium w-24')
+            time_range_slider = ui.range(min=0, max=1, step=0.001, value={'min': 0, 'max': 1}).classes('flex-grow')
+            time_range_label = ui.label('0.000 s – 0.000 s').classes('text-gray-400 w-36 text-right')
+        with ui.row().classes('items-center gap-4'):
+            ui.label('From').classes('text-sm')
+            time_range_from = ui.number(value=0, min=0, max=1, step=0.001, format='%.3f', label='From (s)').classes('w-32')
+            ui.label('To').classes('text-sm')
+            time_range_to = ui.number(value=1, min=0, max=1, step=0.001, format='%.3f', label='To (s)').classes('w-32')
+            time_range_apply_btn = ui.button('Apply', icon='check').props('flat dense color=primary')
+            time_range_reset_btn = ui.button('Reset', icon='restart_alt').props('flat dense color=grey')
         
         with ui.row().classes('w-full flex-nowrap gap-0'):
             histogram_plot = ui.plotly({})
@@ -170,6 +189,12 @@ def build_main_layout(dark, on_polarity_change=None) -> UIComponents:
         file_label=file_label,
         polarity_select=polarity_select,
         roi_label=roi_label,
+        time_range_slider=time_range_slider,
+        time_range_from=time_range_from,
+        time_range_to=time_range_to,
+        time_range_label=time_range_label,
+        time_range_apply_btn=time_range_apply_btn,
+        time_range_reset_btn=time_range_reset_btn,
         frame_polarity_select=frame_polarity_select,
         delta_t_input=delta_t_input,
         frames_input=frames_input,

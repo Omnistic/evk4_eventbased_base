@@ -285,6 +285,93 @@ def create_frames_change_callback(state, components):
     return on_frames_change
 
 
+def create_time_range_slider_callback(state, components):
+    """Create callback for time range slider changes (syncs to number inputs only, no plot update)."""
+    def on_time_range_slider_change() -> None:
+        """Sync slider values to number inputs and update label."""
+        if state.updating:
+            return
+        state.updating = True
+        val = components.time_range_slider.value
+        components.time_range_from.value = round(val['min'], 3)
+        components.time_range_to.value = round(val['max'], 3)
+        components.time_range_label.text = f"{val['min']:.3f} s – {val['max']:.3f} s"
+        state.updating = False
+
+    return on_time_range_slider_change
+
+
+def create_time_range_input_callback(state, components):
+    """Create callback for time range number input changes (syncs to slider only, no plot update)."""
+    def on_time_range_input_change() -> None:
+        """Sync number inputs to slider and update label."""
+        if state.updating:
+            return
+        if components.time_range_from.value is None or components.time_range_to.value is None:
+            return
+        state.updating = True
+        t_from = float(components.time_range_from.value)
+        t_to = float(components.time_range_to.value)
+        # Clamp to slider bounds
+        slider_min = components.time_range_slider._props.get('min', 0)
+        slider_max = components.time_range_slider._props.get('max', 1)
+        t_from = max(slider_min, min(t_from, t_to))
+        t_to = min(slider_max, max(t_to, t_from))
+        components.time_range_slider.value = {'min': t_from, 'max': t_to}
+        components.time_range_label.text = f'{t_from:.3f} s – {t_to:.3f} s'
+        state.updating = False
+
+    return on_time_range_input_change
+
+
+def create_time_range_apply_callback(state, dark, components):
+    """Create callback for the Apply button — updates state and refreshes all plots."""
+    async def apply_time_range() -> None:
+        if state.current_data is None:
+            return
+        # Reset ROI since the histogram will be redrawn and shapes lost
+        state.current_roi = None
+        components.roi_label.text = ''
+        t_from = float(components.time_range_from.value)
+        t_to = float(components.time_range_to.value)
+        duration_s = state.recording_duration_ms / 1000
+        # If the selection covers the full range, treat as no filter
+        if t_from <= 0.0 and t_to >= duration_s:
+            state.current_time_range = None
+        else:
+            state.current_time_range = (t_from, t_to)
+        await create_update_plots_callback(state, dark, components)()
+
+    return apply_time_range
+
+
+def create_time_range_reset_callback(state, dark, components):
+    """Create callback for the Reset button — clears time filter and refreshes all plots."""
+    async def reset_time_range() -> None:
+        if state.current_data is None:
+            return
+        duration_s = state.recording_duration_ms / 1000
+        step = round(duration_s / 1000, 3)
+        state.updating = True
+        components.time_range_slider._props['min'] = 0
+        components.time_range_slider._props['max'] = duration_s
+        components.time_range_slider._props['step'] = step
+        components.time_range_slider.value = {'min': 0, 'max': duration_s}
+        components.time_range_slider.update()
+        components.time_range_from.value = 0
+        components.time_range_from._props['max'] = duration_s
+        components.time_range_from._props['step'] = step
+        components.time_range_to.value = round(duration_s, 3)
+        components.time_range_to._props['max'] = duration_s
+        components.time_range_to._props['step'] = step
+        components.time_range_label.text = f'0.000 s – {duration_s:.3f} s'
+        state.updating = False
+        state.current_time_range = None
+        await create_update_plots_callback(state, dark, components)()
+
+    return reset_time_range
+
+
 def create_pick_file_callback(state, dark, components):
     """
     Create callback for file picker button.
@@ -320,6 +407,7 @@ async def process_file_full(path, state, dark, components):
     """
     state.current_roi = None
     components.roi_label.text = ''
+    state.current_time_range = None
     suffix = path.suffix.lower()
     
     # Handle .raw files (convert to .npz first)
@@ -385,6 +473,26 @@ async def process_file_full(path, state, dark, components):
     state.recording_duration_ms = stats['duration'] * 1000
     components.frames_input.value = 100
     create_frames_change_callback(state, components)()
+
+    # Initialize time range controls to full recording duration
+    duration_s = stats['duration']
+    step = round(duration_s / 1000, 3)
+    components.time_range_slider._props['min'] = 0
+    components.time_range_slider._props['max'] = duration_s
+    components.time_range_slider._props['step'] = step
+    components.time_range_slider.value = {'min': 0, 'max': duration_s}
+    components.time_range_slider.update()
+    components.time_range_from.value = 0
+    components.time_range_from._props['min'] = 0
+    components.time_range_from._props['max'] = duration_s
+    components.time_range_from._props['step'] = step
+    components.time_range_from.update()
+    components.time_range_to.value = round(duration_s, 3)
+    components.time_range_to._props['min'] = 0
+    components.time_range_to._props['max'] = duration_s
+    components.time_range_to._props['step'] = step
+    components.time_range_to.update()
+    components.time_range_label.text = f'0.000 s – {duration_s:.3f} s'
     
     # Update all plots
     try:

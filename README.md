@@ -17,6 +17,7 @@
 - **Frame Generation** - Convert event streams to frame sequences with adjustable time windows
 - **Export Capabilities** - Save generated frames as multi-page TIFF files
 - **Dark/Light Themes** - Toggle between display modes, with preference remembered across sessions
+- **Time Range Filtering** - Restrict all event visualizations to a specific time window using a range slider or exact numeric bounds
 
 ---
 
@@ -158,11 +159,11 @@ evk4_dashboard/
 
 | Module | Purpose | Lines |
 |--------|---------|-------|
-| **app.py** | Application entry point | 106 |
+| **app.py** | Application entry point | 165 |
 | **core/** | State, config, constants, validation | 441 |
 | **services/** | File handling & data loading | 185 |
-| **ui/** | Layout, callbacks, plots | 1,217 |
-| **utils.py** | Event data utilities | 512 |
+| **ui/** | Layout, callbacks, plots | 1,329 |
+| **utils.py** | Event data utilities | 546 |
 
 ---
 
@@ -187,6 +188,16 @@ evk4_dashboard/
 2. Draw a region on the sensor area
 3. Analysis plots automatically update for the selected region
 4. Click "Erase shapes" to reset to full sensor view
+
+### Time Range Filtering
+
+The time range controls restrict all Event Visualization plots to a specific window of the recording. The histogram always shows the full spatial picture for the selected time window; the ROI only affects the analysis plots (time trace, power spectrum, IEI histogram).
+
+1. Use the **range slider** to scrub the window interactively, or enter exact values in the **From / To** number inputs
+2. Click **Apply** to update all plots — this also clears any active ROI since the histogram is redrawn
+3. Click **Reset** to return to the full recording duration
+
+> **Note:** The slider step is set to 1/1000th of the recording duration when a file loads, giving consistent granularity regardless of recording length.
 
 ### Generating Frames
 
@@ -263,18 +274,6 @@ my_plot = ui.plotly({})
 update_my_plot(state, dark.value, polarity_mode, components.my_plot)
 ```
 
-### Adding a New Constant
-
-**Add to** `core/constants.py`:
-```python
-MY_NEW_PARAMETER: int = 42
-```
-
-**Import where needed:**
-```python
-from core import MY_NEW_PARAMETER
-```
-
 ### Adding a New User Preference
 
 **Add a default to** `core/config.py`:
@@ -286,6 +285,18 @@ DEFAULT_CONFIG = {
 ```
 
 Then load and save it the same way as `dark_mode`.
+
+### Adding a New Constant
+
+**Add to** `core/constants.py`:
+```python
+MY_NEW_PARAMETER: int = 42
+```
+
+**Import where needed:**
+```python
+from core import MY_NEW_PARAMETER
+```
 
 ### Adding Validation
 
