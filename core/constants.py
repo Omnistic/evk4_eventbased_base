@@ -32,8 +32,8 @@ BIAS_NAMES: List[str] = [
 # DISPLAY LIMITS
 # ============================================================================
 
-MAX_TIMETRACE_POINTS: int = 20000  # Maximum points to display in time trace (downsampled if exceeded)
-MAX_IEI_POINTS: int = 20000  # Maximum points for inter-event interval histogram
+MAX_TIMETRACE_POINTS: int = 10000  # Maximum points to display in time trace (downsampled if exceeded)
+MAX_IEI_POINTS: int = 10000  # Maximum points for inter-event interval histogram
 MAX_DISPLAY_FRAMES: int = 1000  # Maximum frames to display in viewer (downsampled if exceeded)
 RECONNECT_TIMEOUT: int = 120  # Reconnect timeout in seconds for native app
 
