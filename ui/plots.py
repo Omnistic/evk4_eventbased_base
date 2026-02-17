@@ -131,9 +131,8 @@ def update_histogram_plot(state, dark_mode, polarity_mode, histogram_plot):
         
         if not validate_events_not_empty(events, 'plotting'):
             return
-
-        # Apply time range filter only — ROI is drawn on the histogram
-        # and only affects the other plots, never the histogram itself
+        
+        # Time range filter only — ROI is never applied to the histogram
         events = filter_events_by_time_range(events, state.current_time_range)
 
         if not validate_events_not_empty(events, 'plotting'):

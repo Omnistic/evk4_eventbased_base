@@ -144,11 +144,15 @@ def compute_statistics(events: np.ndarray) -> Dict[str, Any] | None:
         
         event_count = len(events)
         event_rate = event_count / duration
+        on_count = int(np.sum(events['p'] == 1))
+        off_count = int(np.sum(events['p'] == 0))
         
         return {
             'duration': duration,
             'event_count': event_count,
-            'event_rate': event_rate
+            'event_rate': event_rate,
+            'on_count': on_count,
+            'off_count': off_count,
         }
     except Exception as e:
         ui.notify(f'Failed to compute statistics: {str(e)}', type='negative')

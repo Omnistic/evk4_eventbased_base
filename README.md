@@ -2,6 +2,8 @@
 
 > A modern, modular NiceGUI application for visualizing and analyzing event-based camera data from Prophesee EVK4 sensors.
 
+▶️ **[Watch the demo on YouTube](https://youtu.be/XaYHxhMus8U)**
+
 ![Python](https://img.shields.io/badge/python-3.8+-blue.svg)
 ![NiceGUI](https://img.shields.io/badge/NiceGUI-1.0+-green.svg)
 ![Pixi](https://img.shields.io/badge/Pixi-managed-blue.svg)
@@ -16,8 +18,7 @@
 - **Temporal Analysis** - Inter-event interval and power spectrum analysis
 - **Frame Generation** - Convert event streams to frame sequences with adjustable time windows
 - **Export Capabilities** - Save generated frames as multi-page TIFF files
-- **Dark/Light Themes** - Toggle between display modes, with preference remembered across sessions
-- **Time Range Filtering** - Restrict all event visualizations to a specific time window using a range slider or exact numeric bounds
+- **Dark/Light Themes** - Toggle between display modes for comfortable viewing
 
 ---
 
@@ -139,7 +140,6 @@ evk4_dashboard/
 │
 ├── 📦 core/                     # Core application logic
 │   ├── __init__.py
-│   ├── config.py                # User preference persistence
 │   ├── state.py                 # State management & configuration
 │   ├── constants.py             # Application constants
 │   └── validation.py            # Input validation functions
@@ -159,11 +159,11 @@ evk4_dashboard/
 
 | Module | Purpose | Lines |
 |--------|---------|-------|
-| **app.py** | Application entry point | 165 |
-| **core/** | State, config, constants, validation | 441 |
+| **app.py** | Application entry point | 106 |
+| **core/** | State, constants, validation | 404 |
 | **services/** | File handling & data loading | 185 |
-| **ui/** | Layout, callbacks, plots | 1,329 |
-| **utils.py** | Event data utilities | 546 |
+| **ui/** | Layout, callbacks, plots | 1,217 |
+| **utils.py** | Event data utilities | 512 |
 
 ---
 
@@ -188,16 +188,6 @@ evk4_dashboard/
 2. Draw a region on the sensor area
 3. Analysis plots automatically update for the selected region
 4. Click "Erase shapes" to reset to full sensor view
-
-### Time Range Filtering
-
-The time range controls restrict all Event Visualization plots to a specific window of the recording. The histogram always shows the full spatial picture for the selected time window; the ROI only affects the analysis plots (time trace, power spectrum, IEI histogram).
-
-1. Use the **range slider** to scrub the window interactively, or enter exact values in the **From / To** number inputs
-2. Click **Apply** to update all plots — this also clears any active ROI since the histogram is redrawn
-3. Click **Reset** to return to the full recording duration
-
-> **Note:** The slider step is set to 1/1000th of the recording duration when a file loads, giving consistent granularity regardless of recording length.
 
 ### Generating Frames
 
@@ -224,13 +214,6 @@ The time range controls restrict all Event Visualization plots to a specific win
 ```python
 from core import AppState
 state = AppState()  # Centralized application state
-```
-
-**User Preference Persistence**
-```python
-from core import load_config, save_config
-config = load_config()           # Reads ~/.evk4_dashboard_config.json
-save_config({"dark_mode": True}) # Writes preference to disk
 ```
 
 **Component Communication**
@@ -273,18 +256,6 @@ my_plot = ui.plotly({})
 # Call in polarity change callback
 update_my_plot(state, dark.value, polarity_mode, components.my_plot)
 ```
-
-### Adding a New User Preference
-
-**Add a default to** `core/config.py`:
-```python
-DEFAULT_CONFIG = {
-    "dark_mode": True,
-    "my_new_preference": "default_value",
-}
-```
-
-Then load and save it the same way as `dark_mode`.
 
 ### Adding a New Constant
 
@@ -364,10 +335,6 @@ def test_file_loading():
 - Verify write permissions for output directory
 - Check available disk space
 
-**Theme not remembered**
-- The preference is saved to `~/.evk4_dashboard_config.json`
-- If the file is corrupted or missing, the app defaults to dark mode on next launch
-
 ---
 
 ## 📊 Performance Notes
@@ -432,8 +399,10 @@ This project is licensed under the MIT License - see LICENSE file for details.
 ## 🙏 Acknowledgments
 
 - Built with [NiceGUI](https://nicegui.io/)
+- Interactive visualizations powered by [Plotly](https://plotly.com/)
 - Event camera support via [Prophesee Metavision SDK](https://docs.prophesee.ai/)
-- Inspired by event-based vision research community
+- Developed with assistance from [Claude](https://claude.ai/) (Anthropic, claude-sonnet-4-5)
+- Inspired by the work of Cabriel et al. on event-based super-resolution microscopy — [Evb-SMLM](https://github.com/Clement-Cabriel/Evb-SMLM) ([Nature Photonics, 2023](https://doi.org/10.1038/s41566-023-01308-8)) — which motivated our adoption of event-based cameras
 
 ---
 

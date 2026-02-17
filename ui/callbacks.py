@@ -286,9 +286,8 @@ def create_frames_change_callback(state, components):
 
 
 def create_time_range_slider_callback(state, components):
-    """Create callback for time range slider changes (syncs to number inputs only, no plot update)."""
+    """Create callback for time range slider — syncs to number inputs, no plot update."""
     def on_time_range_slider_change() -> None:
-        """Sync slider values to number inputs and update label."""
         if state.updating:
             return
         state.updating = True
@@ -297,14 +296,12 @@ def create_time_range_slider_callback(state, components):
         components.time_range_to.value = round(val['max'], 3)
         components.time_range_label.text = f"{val['min']:.3f} s – {val['max']:.3f} s"
         state.updating = False
-
     return on_time_range_slider_change
 
 
 def create_time_range_input_callback(state, components):
-    """Create callback for time range number input changes (syncs to slider only, no plot update)."""
+    """Create callback for time range number inputs — syncs to slider, no plot update."""
     def on_time_range_input_change() -> None:
-        """Sync number inputs to slider and update label."""
         if state.updating:
             return
         if components.time_range_from.value is None or components.time_range_to.value is None:
@@ -312,7 +309,6 @@ def create_time_range_input_callback(state, components):
         state.updating = True
         t_from = float(components.time_range_from.value)
         t_to = float(components.time_range_to.value)
-        # Clamp to slider bounds
         slider_min = components.time_range_slider._props.get('min', 0)
         slider_max = components.time_range_slider._props.get('max', 1)
         t_from = max(slider_min, min(t_from, t_to))
@@ -320,33 +316,30 @@ def create_time_range_input_callback(state, components):
         components.time_range_slider.value = {'min': t_from, 'max': t_to}
         components.time_range_label.text = f'{t_from:.3f} s – {t_to:.3f} s'
         state.updating = False
-
     return on_time_range_input_change
 
 
 def create_time_range_apply_callback(state, dark, components):
-    """Create callback for the Apply button — updates state and refreshes all plots."""
+    """Create callback for Apply button — updates state and refreshes all plots."""
     async def apply_time_range() -> None:
         if state.current_data is None:
             return
-        # Reset ROI since the histogram will be redrawn and shapes lost
+        # Reset ROI since histogram will be redrawn and shapes lost
         state.current_roi = None
         components.roi_label.text = ''
         t_from = float(components.time_range_from.value)
         t_to = float(components.time_range_to.value)
         duration_s = state.recording_duration_ms / 1000
-        # If the selection covers the full range, treat as no filter
         if t_from <= 0.0 and t_to >= duration_s:
             state.current_time_range = None
         else:
             state.current_time_range = (t_from, t_to)
         await create_update_plots_callback(state, dark, components)()
-
     return apply_time_range
 
 
 def create_time_range_reset_callback(state, dark, components):
-    """Create callback for the Reset button — clears time filter and refreshes all plots."""
+    """Create callback for Reset button — clears time filter and refreshes all plots."""
     async def reset_time_range() -> None:
         if state.current_data is None:
             return
@@ -368,7 +361,6 @@ def create_time_range_reset_callback(state, dark, components):
         state.updating = False
         state.current_time_range = None
         await create_update_plots_callback(state, dark, components)()
-
     return reset_time_range
 
 
@@ -458,12 +450,16 @@ async def process_file_full(path, state, dark, components):
     # Update stats table
     components.stats_table.columns = [
         {'name': 'events', 'label': 'Events', 'field': 'events'},
+        {'name': 'on_count', 'label': 'CD ON', 'field': 'on_count'},
+        {'name': 'off_count', 'label': 'CD OFF', 'field': 'off_count'},
         {'name': 'duration', 'label': 'Duration', 'field': 'duration'},
         {'name': 'rate', 'label': 'Event rate', 'field': 'rate'},
         {'name': 'resolution', 'label': 'Resolution', 'field': 'resolution'},
     ]
     components.stats_table.rows = [{
         'events': f'{stats["event_count"]:,}',
+        'on_count': f'{stats["on_count"]:,}',
+        'off_count': f'{stats["off_count"]:,}',
         'duration': f'{stats["duration"]:.2f} s',
         'rate': f'{stats["event_rate"]:,.0f} ev/s',
         'resolution': f'{width} x {height}',

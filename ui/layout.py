@@ -122,7 +122,6 @@ def build_main_layout(dark, on_polarity_change=None) -> UIComponents:
             ui.badge('CD ON (polarity=1)').style(f'background-color: {PLOT_CONFIG.color_on} !important')
             ui.badge('CD OFF (polarity=0)').style(f'background-color: {PLOT_CONFIG.color_off} !important')
 
-        # Time range controls
         with ui.row().classes('w-full items-center gap-4'):
             ui.label('Time Range').classes('text-sm font-medium w-24')
             time_range_slider = ui.range(min=0, max=1, step=0.001, value={'min': 0, 'max': 1}).classes('flex-grow')
