@@ -23,10 +23,21 @@ import numpy as np
 import numpy.typing as npt
 from typing import Tuple, Optional
 import warnings
+import time
 import plotly.graph_objects as go
 from pathlib import Path
 from tqdm import tqdm
 from metavision_sdk_stream import Camera, CameraStreamSlicer
+
+def profile(func):
+    """Simple timing decorator — prints elapsed time for any wrapped function."""
+    def wrapper(*args, **kwargs):
+        start = time.perf_counter()
+        result = func(*args, **kwargs)
+        elapsed = time.perf_counter() - start
+        print(f'[PROFILE] {func.__name__} took {elapsed:.3f}s')
+        return result
+    return wrapper
 
 # ============================================================================
 # FILE I/O
@@ -216,6 +227,7 @@ def filter_events_by_time_range(
 # HISTOGRAM COMPUTATION
 # ============================================================================
 
+@profile
 def compute_event_histogram(
     events: npt.NDArray[np.void], 
     width: int, 
@@ -227,6 +239,9 @@ def compute_event_histogram(
     
     Counts events at each pixel location. For signed mode, computes the difference
     between ON and OFF event counts at each pixel.
+    
+    Uses np.bincount on flattened pixel coordinates for fast accumulation,
+    which outperforms np.unique and np.histogram2d on large event arrays.
     
     Args:
         events: Event array with 'x', 'y', and 'p' fields
@@ -242,61 +257,41 @@ def compute_event_histogram(
         2D array of shape (height, width) containing event counts per pixel.
         For signed mode, returns int32 array (can be negative).
         For other modes, returns uint32 array (non-negative).
-    
-    Example:
-        >>> events = load_events()
-        >>> histogram = compute_event_histogram(events, 640, 480, mode='all')
-        >>> histogram.shape
-        (480, 640)
-        >>> histogram.max()  # Pixel with most events
-        1523
     """
     width = int(width)
     height = int(height)
-    
+    n_pixels = height * width
+
     if mode == 'signed':
-        # Signed mode: ON events - OFF events
         on_events = events[events['p'] == 1]
         off_events = events[events['p'] == 0]
-        
-        histogram = np.zeros((height, width), dtype=np.int32)
-        
-        # Add ON events
+
+        histogram = np.zeros(n_pixels, dtype=np.int32)
+
         if len(on_events) > 0:
-            coords, counts = np.unique(
-                on_events['y'].astype(np.int64) * width + on_events['x'].astype(np.int64), 
-                return_counts=True
-            )
-            histogram.flat[coords] += counts.astype(np.int32)
-        
-        # Subtract OFF events
+            coords = on_events['y'].astype(np.int32) * width + on_events['x'].astype(np.int32)
+            histogram += np.bincount(coords, minlength=n_pixels).astype(np.int32)
+
         if len(off_events) > 0:
-            coords, counts = np.unique(
-                off_events['y'].astype(np.int64) * width + off_events['x'].astype(np.int64), 
-                return_counts=True
-            )
-            histogram.flat[coords] -= counts.astype(np.int32)
-        
-        return histogram
-    
-    # Regular modes: filter first, then count
+            coords = off_events['y'].astype(np.int32) * width + off_events['x'].astype(np.int32)
+            histogram -= np.bincount(coords, minlength=n_pixels).astype(np.int32)
+
+        return histogram.reshape(height, width)
+
     if mode == 'on':
         events = events[events['p'] == 1]
     elif mode == 'off':
         events = events[events['p'] == 0]
-    
-    histogram = np.zeros((height, width), dtype=np.uint32)
-    coords, counts = np.unique(
-        events['y'].astype(np.int64) * width + events['x'].astype(np.int64), 
-        return_counts=True
-    )
-    histogram.flat[coords] = counts
-    return histogram
+
+    coords = events['y'].astype(np.int32) * width + events['x'].astype(np.int32)
+    histogram = np.bincount(coords, minlength=n_pixels).astype(np.uint32)
+    return histogram.reshape(height, width)
 
 # ============================================================================
 # PLOTLY FIGURE CREATION
 # ============================================================================
 
+@profile
 def create_signed_heatmap(
     histogram: npt.NDArray[np.int32],
     signed_colorscale: list,
@@ -339,6 +334,7 @@ def create_signed_heatmap(
         colorbar=dict(title='ON - OFF')
     ))
 
+@profile
 def create_regular_heatmap(
     histogram: npt.NDArray[np.uint32],
     zmin: Optional[float] = None,

@@ -20,6 +20,7 @@ from utils import (
     create_signed_heatmap,
     create_regular_heatmap,
     get_polarity_mode_from_string,
+    profile,
 )
 from core import (
     PLOT_CONFIG,
@@ -107,6 +108,7 @@ def get_base_layout(dark_mode: bool, **kwargs) -> dict:
     return base
 
 
+@profile
 def update_histogram_plot(state, dark_mode, polarity_mode, histogram_plot, zmin=None, zmax=None):
     """
     Update event histogram plot.
@@ -173,6 +175,7 @@ def update_histogram_plot(state, dark_mode, polarity_mode, histogram_plot, zmin=
         traceback.print_exc()
 
 
+@profile
 def update_iei_histogram(state, dark_mode, polarity_mode, iei_plot):
     """
     Update inter-event interval (IEI) histogram.
@@ -256,6 +259,7 @@ def update_iei_histogram(state, dark_mode, polarity_mode, iei_plot):
         traceback.print_exc()
 
 
+@profile
 def update_power_spectrum(state, dark_mode, polarity_mode, spectrum_plot):
     """
     Update power spectrum plot via FFT analysis.
@@ -291,22 +295,26 @@ def update_power_spectrum(state, dark_mode, polarity_mode, spectrum_plot):
             return
         
         bin_width_us = POWER_SPECTRUM_BIN_WIDTH_US
-        bins = np.arange(times_us.min(), times_us.max() + bin_width_us, bin_width_us)
-        
-        if not validate_array_length(bins, 2, 'bins for power spectrum'):
+        t_min = int(times_us.min())
+        t_max = int(times_us.max())
+        n_bins = int((t_max - t_min) // bin_width_us) + 1
+
+        if n_bins < 2:
             return
-        
-        # Compute event counts per bin
+
+        # Compute event counts per bin using bincount (faster than np.histogram)
         if mode == 'signed':
             on_events = filter_events_by_polarity(events, 'on')
             off_events = filter_events_by_polarity(events, 'off')
-            on_counts, _ = np.histogram(on_events['t'], bins=bins)
-            off_counts, _ = np.histogram(off_events['t'], bins=bins)
+            on_indices = ((on_events['t'] - t_min) // bin_width_us).astype(np.int32)
+            off_indices = ((off_events['t'] - t_min) // bin_width_us).astype(np.int32)
+            on_counts = np.bincount(on_indices, minlength=n_bins)
+            off_counts = np.bincount(off_indices, minlength=n_bins)
             counts = on_counts.astype(np.float64) - off_counts.astype(np.float64)
         else:
             events = filter_events_by_polarity(events, mode)
-            times_us = events['t']
-            counts, _ = np.histogram(times_us, bins=bins)
+            bin_indices = ((events['t'] - t_min) // bin_width_us).astype(np.int32)
+            counts = np.bincount(bin_indices, minlength=n_bins).astype(np.float64)
         
         # Compute FFT
         if not validate_array_length(counts, 2, 'counts for FFT'):
@@ -349,6 +357,7 @@ def update_power_spectrum(state, dark_mode, polarity_mode, spectrum_plot):
         traceback.print_exc()
 
 
+@profile
 def update_timetrace(state, dark_mode, polarity_mode, timetrace_plot):
     """
     Update time trace scatter plot.
@@ -356,7 +365,7 @@ def update_timetrace(state, dark_mode, polarity_mode, timetrace_plot):
     Displays individual events as colored points over time, with ON events in
     orange and OFF events in blue. Vertical position is randomized (jittered)
     for visual clarity. Applies current ROI and polarity filters.
-    Downsamples if data exceeds MAX_TIMETRACE_POINTS.
+    Downsamples if data exceeds MAX_TIMETRACE_POINTS using a fast RNG.
     
     Args:
         state: AppState instance
@@ -380,9 +389,10 @@ def update_timetrace(state, dark_mode, polarity_mode, timetrace_plot):
             timetrace_plot.visible = False
             return
         
-        # Downsample if needed
+        # Downsample if needed — use default_rng for significantly faster sampling
         if len(events) > MAX_TIMETRACE_POINTS:
-            indices = np.random.choice(len(events), MAX_TIMETRACE_POINTS, replace=False)
+            rng = np.random.default_rng()
+            indices = rng.choice(len(events), MAX_TIMETRACE_POINTS, replace=False, shuffle=False)
             indices.sort()
             events = events[indices]
             ui.notify(f'Downsampled to {MAX_TIMETRACE_POINTS:,} points', type='info')
