@@ -141,6 +141,7 @@ evk4_dashboard/
 │
 ├── 📦 core/                     # Core application logic
 │   ├── __init__.py
+│   ├── config.py                # User preference persistence
 │   ├── state.py                 # State management & configuration
 │   ├── constants.py             # Application constants
 │   └── validation.py            # Input validation functions
@@ -402,7 +403,7 @@ This project is licensed under the MIT License - see LICENSE file for details.
 - Built with [NiceGUI](https://nicegui.io/)
 - Interactive visualizations powered by [Plotly](https://plotly.com/)
 - Event camera support via [Prophesee Metavision SDK](https://docs.prophesee.ai/)
-- Developed with assistance from [Claude](https://claude.ai/) (Anthropic, claude-sonnet-4-5)
+- Developed with assistance from [Claude](https://claude.ai/) (Anthropic)
 - Inspired by the work of Cabriel et al. on event-based super-resolution microscopy — [Evb-SMLM](https://github.com/Clement-Cabriel/Evb-SMLM) ([Nature Photonics, 2023](https://doi.org/10.1038/s41566-023-01308-8)) — which motivated our adoption of event-based cameras
 
 ---

@@ -19,7 +19,6 @@ from utils import (
     create_signed_heatmap,
     create_regular_heatmap,
     get_polarity_mode_from_string,
-    profile,
 )
 from core import (
     PLOT_CONFIG,

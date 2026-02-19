@@ -122,16 +122,16 @@ class PlotConfig:
         """Initialize colorscales after dataclass creation."""
         if self.signed_colorscale_light is None:
             self.signed_colorscale_light = [
-                [0, f'rgb(86, 180, 233)'],  # Blue (OFF)
+                [0, 'rgb(86, 180, 233)'],  # Blue (OFF)
                 [0.5, 'rgba(0, 0, 0, 0)'],  # Transparent black center
-                [1, f'rgb(230, 159, 0)']    # Orange (ON)
+                [1, 'rgb(230, 159, 0)']    # Orange (ON)
             ]
         
         if self.signed_colorscale_dark is None:
             self.signed_colorscale_dark = [
-                [0, f'rgb(86, 180, 233)'],  # Blue (OFF)
+                [0, 'rgb(86, 180, 233)'],  # Blue (OFF)
                 [0.5, 'rgba(255, 255, 255, 0)'],  # Transparent white center
-                [1, f'rgb(230, 159, 0)']    # Orange (ON)
+                [1, 'rgb(230, 159, 0)']    # Orange (ON)
             ]
     
     def get_signed_colorscale(self, dark_mode: bool) -> List[List]:

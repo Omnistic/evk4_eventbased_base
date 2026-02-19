@@ -48,33 +48,14 @@ executor = ThreadPoolExecutor(max_workers=4)
 
 @asynccontextmanager
 async def loading_overlay(message: str = 'Loading...'):
-    """
-    Context manager for displaying loading overlays during async operations.
-    
-    Shows a persistent dialog with spinner and message while work is in progress.
-    Automatically closes when context exits.
-    
-    Args:
-        message: Message to display in the overlay
-    
-    Yields:
-        None
-    
-    Example:
-        async with loading_overlay('Processing data...'):
-            result = await some_async_function()
-    """
+    """Show a blocking spinner dialog while an async operation runs."""
     overlay = ui.dialog().props('persistent')
     with overlay:
-        # Card with strong shadow for visibility
         with ui.card().classes('items-center p-8 shadow-2xl border-2'):
-            # Large, thick spinner in primary color (blue - visible in both modes)
             ui.spinner(size='xl', color='primary', thickness=7)
-            # Bold, large text
             ui.label(message).classes('mt-4 text-xl font-bold')
     overlay.open()
     await asyncio.sleep(0.05)
-    
     try:
         yield
     finally:
@@ -98,7 +79,6 @@ def create_toggle_dark_callback(state, dark, components):
         Async callback function
     """
     async def toggle_dark() -> None:
-        """Toggle between dark and light mode themes."""
         async with loading_overlay('Switching theme...'):
             dark.toggle()
             save_config({"dark_mode": dark.value})
@@ -164,7 +144,6 @@ def create_update_plots_callback(state, dark, components):
         Async callback function
     """
     async def update_plots() -> None:
-        """Update all plots concurrently with current data and settings."""
         if state.current_data is None:
             return
         
@@ -199,7 +178,6 @@ def create_on_shape_drawn_callback(state, dark, components):
         Async callback function
     """
     async def on_shape_drawn(e) -> None:
-        """Handle ROI shape drawing on histogram."""
         if e.args is None or state.current_data is None:
             return
         
@@ -265,7 +243,6 @@ def create_on_shape_drawn_callback(state, dark, components):
 def create_delta_t_change_callback(state, components):
     """Create callback for delta T input changes."""
     def on_delta_t_change() -> None:
-        """Handle delta T input change."""
         if state.updating or state.recording_duration_ms == 0 or components.delta_t_input.value is None:
             return
         state.updating = True
@@ -280,7 +257,6 @@ def create_delta_t_change_callback(state, components):
 def create_frames_change_callback(state, components):
     """Create callback for frame count input changes."""
     def on_frames_change() -> None:
-        """Handle frame count input change."""
         if state.updating or state.recording_duration_ms == 0 or components.frames_input.value is None:
             return
         state.updating = True
@@ -384,7 +360,6 @@ def create_pick_file_callback(state, dark, components):
         Async callback function
     """
     async def handle_pick_file() -> None:
-        """Open file picker and process selected file."""
         path = await pick_file()
         if path is None:
             return
@@ -518,7 +493,6 @@ async def process_file_full(path, state, dark, components):
 def create_update_frame_display_callback(state, components):
     """Create callback for frame slider."""
     def update_frame_display() -> None:
-        """Update displayed frame based on slider position."""
         if state.generated_frames is None or len(state.generated_frames) == 0:
             return
         
@@ -544,7 +518,6 @@ def create_update_frame_display_callback(state, components):
 def create_generate_frames_callback(state, dark, components):
     """Create callback for generate frames button."""
     async def generate_frames_callback() -> None:
-        """Generate frames from event data for visualization."""
         if state.current_data is None:
             ui.notify('No data loaded', type='warning')
             return
@@ -640,7 +613,6 @@ def create_generate_frames_callback(state, dark, components):
 def create_export_frames_callback(state, components):
     """Create callback for export frames button."""
     async def export_frames_callback() -> None:
-        """Export frames to multi-page TIFF file."""
         if state.current_data is None:
             ui.notify('No data loaded', type='warning')
             return
